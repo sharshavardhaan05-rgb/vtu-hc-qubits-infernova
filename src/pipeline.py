@@ -52,3 +52,5 @@ def run_exchange(noise_level, eve_on, rng=None):
             key = _get("derive_key")[0](final)
     return {"qber": qber, "verdict": verdict,
             "final_key_len": final_len, "key": key}
+def get_expected_qber(level):
+    return _get("expected_qber")[0](level)
