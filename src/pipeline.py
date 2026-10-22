@@ -2,7 +2,7 @@ import importlib
 import numpy as np
 from src import _stubs
 
-_HOME = {
+_HOME = {    "encrypt": "chat", "decrypt": "chat",
     "run_bb84": "bb84", "build_noise_model": "noise", "expected_qber": "noise",
     "reconcile": "postprocess", "privacy_amplify": "postprocess",
     "classify": "trust_meter", "derive_key": "chat",
@@ -45,6 +45,12 @@ def run_exchange(noise_level, eve_on, rng=None):
     verdict = _get("classify")[0](qber, noise_level)["verdict"]
 
     key, final_len = None, 0
+def encrypt_msg(key, text):
+    return _get("encrypt")[0](key, text)
+
+
+def decrypt_msg(key, blob):
+    return _get("decrypt")[0](key, blob)
     if verdict != "compromised":
         final = _get("privacy_amplify")[0](a_fix, qber, leaked)
         final_len = len(final)

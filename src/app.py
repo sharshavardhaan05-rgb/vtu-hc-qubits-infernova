@@ -8,8 +8,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
 import streamlit as st
-from src.pipeline import run_exchange, using_stubs, get_expected_qber
-
+from src.pipeline import (run_exchange, using_stubs, get_expected_qber,
+                          encrypt_msg, decrypt_msg)
 QBER_LIMIT = 0.11  # BB84 security limit
 
 
@@ -70,3 +70,42 @@ elif ex["verdict"] == "noisy":
     st.warning("Channel is noisy but usable. The key is shorter.")
 else:
     st.error("🚨 Channel compromised. Key discarded, messaging blocked.")
+st.divider()
+st.subheader("💬 Secure chat")
+st.session_state.setdefault("msgs", [])
+key = ex["key"]
+blocked = key is None
+if blocked:
+    st.error("Session blocked: no key exists, so sending is disabled. "
+             "Run a new key exchange on a clean channel.")
+
+
+def send(sender, text):
+    if key is None or not text.strip():  # hard stop, not just a disabled button
+        return
+    blob = encrypt_msg(key, text.strip())
+    st.session_state.msgs.append(
+        {"from": sender, "blob": blob, "plain": decrypt_msg(key, blob)})
+
+
+cols = st.columns(2)
+for col, me, other in ((cols[0], "Alice", "Bob"), (cols[1], "Bob", "Alice")):
+    with col:
+        st.markdown(f"**{me}**")
+        with st.container(height=260):
+            for m in st.session_state.msgs:
+                if m["from"] == me:
+                    st.chat_message("user").write(m["plain"])
+                else:
+                    st.chat_message("assistant").write(f"{m['from']}: {m['plain']}")
+        with st.form(f"form_{me}", clear_on_submit=True):
+            text = st.text_input(f"{me} message", disabled=blocked,
+                                 placeholder=f"{me} → {other}",
+                                 label_visibility="collapsed")
+            if st.form_submit_button("Send", disabled=blocked):
+                send(me, text)
+                st.rerun()
+
+with st.expander("🕵️ What an eavesdropper sees (ciphertext)"):
+    for m in st.session_state.msgs:
+        st.code(f"{m['from']}: {m['blob'].hex()[:96]}")
