@@ -1,11 +1,12 @@
-import importlib
+﻿import importlib
 import numpy as np
 from src import _stubs
 
-_HOME = {    "encrypt": "chat", "decrypt": "chat",
+_HOME = {
     "run_bb84": "bb84", "build_noise_model": "noise", "expected_qber": "noise",
     "reconcile": "postprocess", "privacy_amplify": "postprocess",
     "classify": "trust_meter", "derive_key": "chat",
+    "encrypt": "chat", "decrypt": "chat",
 }
 N_QUBITS, N_BATCHES = 512, 4  # tune once the real bb84 is merged
 
@@ -45,12 +46,6 @@ def run_exchange(noise_level, eve_on, rng=None):
     verdict = _get("classify")[0](qber, noise_level)["verdict"]
 
     key, final_len = None, 0
-def encrypt_msg(key, text):
-    return _get("encrypt")[0](key, text)
-
-
-def decrypt_msg(key, blob):
-    return _get("decrypt")[0](key, blob)
     if verdict != "compromised":
         final = _get("privacy_amplify")[0](a_fix, qber, leaked)
         final_len = len(final)
@@ -58,5 +53,15 @@ def decrypt_msg(key, blob):
             key = _get("derive_key")[0](final)
     return {"qber": qber, "verdict": verdict,
             "final_key_len": final_len, "key": key}
+
+
 def get_expected_qber(level):
     return _get("expected_qber")[0](level)
+
+
+def encrypt_msg(key, text):
+    return _get("encrypt")[0](key, text)
+
+
+def decrypt_msg(key, blob):
+    return _get("decrypt")[0](key, blob)
