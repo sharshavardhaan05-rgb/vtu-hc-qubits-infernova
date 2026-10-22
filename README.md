@@ -115,8 +115,32 @@ vtu-hc-qubits-infernova/
 └── docs/                  # Notes, diagrams, reports
 ```
 
-## 🚀 How to Run (step 4)
+## 🚀 How to Run
 
+Requires Python 3.11 and Windows PowerShell.
+
+```powershell
+git clone https://github.com/vtu-qiskit-fall-fest-2026/vtu-hc-qubits-infernova.git
+cd vtu-hc-qubits-infernova
+py -3.11 -m venv qenv
+.\qenv\Scripts\Activate.ps1
+pip install -r requirements.txt
+pip install streamlit cryptography
+python -m streamlit run src/app.py
 ```
-streamlit run src/app.py
+
+Then open http://localhost:8501.
+
+**3-step demo:**
+1. Noise 0.1, Eve off: click *New key exchange*, then chat as Alice and Bob (safe).
+2. Noise 0.9, Eve off: the link is noisy but usable, so the key is shorter and chat still works.
+3. Eve on: QBER jumps to about 25%, the alarm shows, the key is discarded and sending is blocked.
+
+**Other commands:**
+
+```powershell
+python -m pytest tests -q
+python notebooks/make_charts.py
 ```
+
+The IBM Quantum token is never stored in this repository.
